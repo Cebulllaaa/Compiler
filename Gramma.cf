@@ -1,0 +1,57 @@
+{-
+Gramma
+Author: Bartosz Cybulski
+
+
+-}
+
+entrypoints Program ;
+
+token Pidentifier (letter | ["_"])+ ;
+token Number      ["+-"]? digit+ ;
+
+Program.    Program ::= "VAR" [Declaration] "BEGIN" [Command] "END" ;
+simpleProg. Program ::= "BEGIN" [Command] "END" ;
+
+define simpleProg cmds = Program [] cmds ;
+
+
+separator nonempty Declaration "," ;
+
+ScalarDecl. Declaration ::= Pidentifier ;
+ArrayDecl.  Declaration ::= Pidentifier "[" Number ":" Number "]" ;
+
+separator nonempty Command "" ;
+
+Assign.     Command ::= Identifier "ASSIGN" Expression ";" ;
+IfElse.     Command ::= "IF" Condition "THEN" [Command] "ELSE" [Command] "ENDIF" ;
+ifElseSkip. Command ::= "IF" Condition "THEN" [Command] "ENDIF" ;
+While.      Command ::= "WHILE" Condition "DO" [Command] "ENDWHILE" ;
+Repeat.     Command ::= "REPEAT" [Command] "UNTIL" Condition ";" ;
+ForTo.      Command ::= "FOR" Pidentifier "FROM" Value "TO" Value "DO" [Command] "ENDFOR" ;
+ForDownTo.  Command ::= "FOR" Pidentifier "FROM" Value "DOWNTO" Value "DO" [Command] "ENDFOR" ;
+Read.       Command ::= "READ" Identifier ";" ;
+Write.      Command ::= "WRITE" Value ";" ;
+
+define ifElseSkip cond cmds = IfElse cond cmds [] ;
+
+ValueExpr. Expression ::= Value ;
+Plus.      Expression ::= Value "PLUS" Value ;
+Minus.     Expression ::= Value "MINUS" Value ;
+Times.     Expression ::= Value "TIMES" Value ;
+Div.       Expression ::= Value "DIV" Value ;
+Mod.       Expression ::= Value "MOD" Value ;
+
+Eq.  Condition ::= Value "EQ" Value ;
+Neq. Condition ::= Value "NEQ" Value ;
+Le.  Condition ::= Value "LE" Value ;
+Ge.  Condition ::= Value "GE" Value ; 
+Leq. Condition ::= Value "LEQ" Value ;
+Geq. Condition ::= Value "GEQ" Value ;
+
+NumValue. Value ::= Number ;
+IdValue.  Value ::= Identifier ;
+
+ScalarId. Identifier ::= Pidentifier ;
+VarArrayId. Identifier ::= Pidentifier "[" Pidentifier "]" ;
+ConstArrayId. Identifier ::= Pidentifier "[" Number "]" ;
