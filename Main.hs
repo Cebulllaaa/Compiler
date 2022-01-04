@@ -5,13 +5,19 @@ import Data.Text.IO as TIO (readFile, writeFile)
 import Data.Text as T
 import Data.Sequence
 import Gramma.Par (pProgram, myLexer)
-import Gramma.Abs (Program)
+import Gramma.Abs 
 
 optimize :: Program -> Program
 optimize = id
 
-generateCode ::Program -> [OpCode]
-generateCode = undefined
+analize:: Program -> Program
+analize = id
+
+generateOpCode :: Command -> OpCode
+generateOpCode (Write x ) = 
+
+generateCode :: Program -> [OpCode]
+generateCode (Program declarations commands) = undefined
 
 showText :: Show a => a -> Text
 showText = pack . show
@@ -43,6 +49,7 @@ main = do
             case pProgram inputTokens of
                 Left errorMessage -> putStrLn errorMessage
                 Right abstractSyntaxTree -> do
-                    let optimizedTree = optimize abstractSyntaxTree
+                    let analizedTree = analize abstractSyntaxTree
+                    let optimizedTree = optimize analizedTree
                     let generatedCode = generateCode optimizedTree
                     TIO.writeFile outputPath $ T.unlines  $ showText <$> generatedCode
