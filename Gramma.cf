@@ -6,6 +6,7 @@ Author: Bartosz Cybulski
 -}
 
 entrypoints Program ;
+comment "(" ")";
 
 token Pidentifier (letter | ["_"])+ ;
 token Number      ["+-"]? digit+ ;

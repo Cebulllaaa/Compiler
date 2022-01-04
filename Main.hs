@@ -1,28 +1,24 @@
 module Main where
 
 import System.Environment (getArgs)
-import Data.Text.IO as TIO (readFile)
+import Data.Text.IO as TIO (readFile, writeFile)
 import Data.Text as T
 import Data.Sequence
 import Gramma.Par (pProgram, myLexer)
-
-removeComments :: Text -> Text
-removeComments = _
+import Gramma.Abs (Program)
 
 optimize :: Program -> Program
 optimize = id
 
-data Reg
-    = A | B | C | D | E | F | G | H
+generateCode ::Program -> [OpCode]
+generateCode = undefined
 
-instance Show Reg where
-    show A = "a"
-    show B = "b"
-    show C = "b"
-    show B = "b"
-    show B = "b"
-    show B = "b"
-    show H = "b"
+showText :: Show a => a -> Text
+showText = pack . show
+
+
+data Reg = 
+    A | B | C | D | E | F | G | H deriving  Show
 
 type CodePos = Integer
 
@@ -43,11 +39,10 @@ main = do
     case args of
         [inputPath, outputPath] -> do
             inputText <- TIO.readFile inputPath
-            let inputNoComments = removeComments inputText
-            let inputTokens = myLexer inputNoComments
+            let inputTokens = myLexer inputText
             case pProgram inputTokens of
-                Left errorMessage -> printStrLn errorMessage
+                Left errorMessage -> putStrLn errorMessage
                 Right abstractSyntaxTree -> do
                     let optimizedTree = optimize abstractSyntaxTree
                     let generatedCode = generateCode optimizedTree
-                    writeFile outputPath $ unlines $ toList $ show <$> generatedCode
+                    TIO.writeFile outputPath $ T.unlines  $ showText <$> generatedCode

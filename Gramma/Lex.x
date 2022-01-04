@@ -33,6 +33,9 @@ $u = [. \n]          -- universal: any character
 
 :-
 
+-- Block comment "(" ")"
+\( [$u # \)]* \) ;
+
 -- Whitespace (skipped)
 $white+ ;
 
