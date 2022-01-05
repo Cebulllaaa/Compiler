@@ -16,7 +16,8 @@ ALEX_OPTS  = --ghc
 
 all : Gramma/Abs.hs Gramma/Layout.hs Gramma/Lex.hs \
 	Gramma/Par.hs Gramma/Print.hs Gramma/Doc.txt \
-	Gramma/Par.info bin/Compiler bin/Test clean 
+	Gramma/Par.info bin/Compiler bin/Test  \
+	clean  
 
 # Rules for building the parser.
 

@@ -321,7 +321,7 @@ happyReduction_13 (happy_x_5 `HappyStk`
 	 = case happyOut12 happy_x_2 of { (HappyWrap12 happy_var_2) -> 
 	case happyOut9 happy_x_4 of { (HappyWrap9 happy_var_4) -> 
 	happyIn10
-		 (Gramma.Abs.ifElseSkip happy_var_2 happy_var_4
+		 (Gramma.Abs.IfElseSkip happy_var_2 happy_var_4
 	) `HappyStk` happyRest}}
 
 happyReduce_14 = happyReduce 5# 6# happyReduction_14

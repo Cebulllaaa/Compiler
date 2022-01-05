@@ -94,7 +94,7 @@ Command :: { Gramma.Abs.Command }
 Command
   : Identifier 'ASSIGN' Expression ';' { Gramma.Abs.Assign $1 $3 }
   | 'IF' Condition 'THEN' ListCommand 'ELSE' ListCommand 'ENDIF' { Gramma.Abs.IfElse $2 $4 $6 }
-  | 'IF' Condition 'THEN' ListCommand 'ENDIF' { Gramma.Abs.ifElseSkip $2 $4 }
+  | 'IF' Condition 'THEN' ListCommand 'ENDIF' { Gramma.Abs.IfElseSkip $2 $4 }
   | 'WHILE' Condition 'DO' ListCommand 'ENDWHILE' { Gramma.Abs.While $2 $4 }
   | 'REPEAT' ListCommand 'UNTIL' Condition ';' { Gramma.Abs.Repeat $2 $4 }
   | 'FOR' Pidentifier 'FROM' Value 'TO' Value 'DO' ListCommand 'ENDFOR' { Gramma.Abs.ForTo $2 $4 $6 $8 }

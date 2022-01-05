@@ -22,6 +22,7 @@ data Declaration
 data Command
     = Assign Identifier Expression
     | IfElse Condition [Command] [Command]
+    | IfElseSkip Condition [Command]
     | While Condition [Command]
     | Repeat [Command] Condition
     | ForTo Pidentifier Value Value [Command]
@@ -59,9 +60,6 @@ data Identifier
 
 simpleProg :: [Command] -> Program
 simpleProg cmds = Program [] cmds
-
-ifElseSkip :: Condition -> [Command] -> Command
-ifElseSkip cond cmds = IfElse cond cmds []
 
 newtype Pidentifier = Pidentifier Data.Text.Text
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
