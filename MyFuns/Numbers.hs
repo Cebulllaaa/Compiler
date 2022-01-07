@@ -1,22 +1,21 @@
 module MyFuns.Numbers (
     generateIncCode,
-    valueOf
+    valueOf,
+    getExp
 
 ) where
 import MyFuns.SimpleLanguage
 import Gramma.Abs 
-
-
-remNumPart :: String -> String
-remNumPart s =  [x | x <- s, not (x `elem` "Number \"\'")]
-
-textOfNumber :: Number -> String
-textOfNumber n =  ( remNumPart $ show n )
+import Data.Text as T
 
 valueOf :: Number -> Integer
-valueOf s =   read (textOfNumber s)::Integer
+valueOf (Number txt) = read $ unpack txt
 
-generateIncCode :: Integer -> [OpCode] -> [OpCode]
-generateIncCode x  y 
-    | x > 0  = [INC A] ++ ( (generateIncCode (x-1)) y )
+generateIncCode :: Integer -> [OpCode] -> Reg -> [OpCode]
+generateIncCode x  y r
+    | x > 0  = [INC r] ++ ( (generateIncCode (x-1)) y r)
     | otherwise = y
+
+getExp :: Expression -> [OpCode]
+getExp (ValueExpr x) = undefined
+getExp (Plus (NumValue x) (NumValue y)) = 

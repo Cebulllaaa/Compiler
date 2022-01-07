@@ -8,13 +8,14 @@ data Reg =
 instance Show Reg where
     show A = "a"
     show B = "b"
-    show C = "b"
-    show B = "b"
-    show B = "b"
-    show B = "b"
-    show H = "b"
+    show C = "c"
+    show D = "d"
+    show E = "e"
+    show F = "f"
+    show G = "g"
+    show H = "h"
 
-type CodePos = Integer
+type CodePos = Int
 
 type Code = Seq OpCode
 
@@ -24,7 +25,9 @@ data OpCode
     | PUT
     | LOAD Reg
     | STORE Reg
-    | JUMP CodePos
     | RESET Reg
     | INC Reg
+    | DEC Reg
+    | JUMP CodePos
+    | JPOS CodePos
     deriving Show

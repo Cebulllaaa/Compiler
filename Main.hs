@@ -5,10 +5,12 @@ import Data.Text.IO as TIO (readFile, writeFile)
 import Data.Text as T
 import Data.Sequence
 import Gramma.Par (pProgram, myLexer)
-import MyFuns.Numbers (generateIncCode, valueOf)
+import MyFuns.Numbers (generateIncCode, valueOf, getExp)
+import MyFuns.Flow (genCond)
 import Gramma.Abs 
 import Debug.Trace
 import MyFuns.SimpleLanguage
+
 
 corText :: Text -> Text 
 corText t = 
@@ -22,9 +24,14 @@ analize = id
 
 generateOpCode :: Command -> [OpCode]
 generateOpCode (Write ( NumValue x))  = 
-    [RESET A] ++ (generateIncCode ((valueOf x ) -1) [INC A] ) ++ [PUT]
-generateOpCode (IfElse cond cmdsI cmdsE) = undefined
-generateOpCode ( IfElseSkip  cond cmds ) = undefined
+    [RESET H] ++ (generateIncCode ((valueOf x ) -1) [INC H] H) ++ [LOAD H] ++ [PUT]
+generateOpCode (IfElse cond cmdsI cmdsE) = 
+    (genCond cond ((Prelude.length $ Prelude.concat (Prelude.map  generateOpCode  cmdsI)) + 1))  
+    ++  Prelude.concat (Prelude.map  generateOpCode  cmdsI) ++ Prelude.concat (Prelude.map  generateOpCode  cmdsE)
+generateOpCode ( IfElseSkip  cond cmds ) = 
+    (genCond cond ((Prelude.length $ Prelude.concat (Prelude.map  generateOpCode  cmds)) + 1))  ++  Prelude.concat (Prelude.map  generateOpCode  cmds)
+generateOpCode (Assign id exp) = getExp exp
+
 
 generateCode :: Program -> [[OpCode]]
 generateCode (Program declarations commands)  = 

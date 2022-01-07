@@ -1,0 +1,8 @@
+RESET a
+DEC a
+JPOS 5
+RESET h
+INC h
+LOAD h
+PUT
+HALT
