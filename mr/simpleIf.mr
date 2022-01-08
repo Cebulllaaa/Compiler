@@ -1,8 +1,8 @@
 RESET a
 DEC a
-JPOS 5
+JNEG 5
 RESET h
 INC h
-LOAD h
+SWAP h
 PUT
 HALT

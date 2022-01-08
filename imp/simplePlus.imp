@@ -2,5 +2,5 @@ VAR
 x
 BEGIN
 x ASSIGN 2 PLUS 1;
-WRITE x
+WRITE x;
 END

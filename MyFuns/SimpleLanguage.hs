@@ -26,8 +26,10 @@ data OpCode
     | LOAD Reg
     | STORE Reg
     | RESET Reg
+    | SWAP Reg
     | INC Reg
     | DEC Reg
     | JUMP CodePos
     | JPOS CodePos
+    | JNEG CodePos
     deriving Show

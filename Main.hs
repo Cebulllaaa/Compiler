@@ -24,7 +24,8 @@ analize = id
 
 generateOpCode :: Command -> [OpCode]
 generateOpCode (Write ( NumValue x))  = 
-    [RESET H] ++ (generateIncCode ((valueOf x ) -1) [INC H] H) ++ [LOAD H] ++ [PUT]
+    [RESET H] ++ (generateIncCode ((valueOf x ) -1) [INC H] H) ++ [SWAP H] ++ [PUT]
+generateOpCode (Write (IdValue x)) = [RESET A] ++ [LOAD D]  ++[PUT] 
 generateOpCode (IfElse cond cmdsI cmdsE) = 
     (genCond cond ((Prelude.length $ Prelude.concat (Prelude.map  generateOpCode  cmdsI)) + 1))  
     ++  Prelude.concat (Prelude.map  generateOpCode  cmdsI) ++ Prelude.concat (Prelude.map  generateOpCode  cmdsE)

@@ -1,0 +1,9 @@
+RESET d
+INC d
+INC d
+INC d
+STORE d
+RESET a
+LOAD d
+PUT
+HALT
