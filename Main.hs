@@ -6,7 +6,7 @@ import Data.Text as T
 import Data.Sequence
 import Gramma.Par (pProgram, myLexer)
 import MyFuns.Numbers (generateIncCode, valueOf, getExp)
-import MyFuns.Flow (genCond)
+import MyFuns.Flow (genCond, genUntilCode)
 import Gramma.Abs 
 import Debug.Trace
 import MyFuns.SimpleLanguage
@@ -14,7 +14,8 @@ import MyFuns.SimpleLanguage
 
 corText :: Text -> Text 
 corText t = 
-    T.map (\c -> if c ==',' then '\n'  else c ) $ T.filter (not . (`elem` "[]")) t
+    T.map (\c -> if c ==',' then '\n'  else c ) $ T.filter (not . (`elem` "[]")) 
+    $ T.filter (not . (`elem` "()")) t 
 
 optimize :: Program -> Program
 optimize = id
@@ -25,13 +26,16 @@ analize = id
 generateOpCode :: Command -> [OpCode]
 generateOpCode (Write ( NumValue x))  = 
     [RESET H] ++ (generateIncCode ((valueOf x ) -1) [INC H] H) ++ [SWAP H] ++ [PUT]
-generateOpCode (Write (IdValue x)) = [RESET A] ++ [LOAD D]  ++[PUT] 
+generateOpCode (Write (IdValue x)) = [RESET A] ++ [SWAP D]  ++[PUT] 
 generateOpCode (IfElse cond cmdsI cmdsE) = 
     (genCond cond ((Prelude.length $ Prelude.concat (Prelude.map  generateOpCode  cmdsI)) + 1))  
     ++  Prelude.concat (Prelude.map  generateOpCode  cmdsI) ++ Prelude.concat (Prelude.map  generateOpCode  cmdsE)
 generateOpCode ( IfElseSkip  cond cmds ) = 
     (genCond cond ((Prelude.length $ Prelude.concat (Prelude.map  generateOpCode  cmds)) + 1))  ++  Prelude.concat (Prelude.map  generateOpCode  cmds)
 generateOpCode (Assign id exp) = getExp exp
+generateOpCode (Read id) = [GET]
+generateOpCode (Repeat cmds  cond) = (Prelude.concat (Prelude.map generateOpCode cmds )) ++ 
+    (genUntilCode cond (Prelude.length $ Prelude.concat (Prelude.map generateOpCode cmds )))
 
 
 generateCode :: Program -> [[OpCode]]

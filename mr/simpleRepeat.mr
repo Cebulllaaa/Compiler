@@ -1,0 +1,8 @@
+RESET h
+INC h
+SWAP h
+PUT
+RESET a
+INC a
+JNEG -4
+HALT

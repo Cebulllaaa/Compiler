@@ -19,12 +19,12 @@ generateIncCode x  y r
 getExp :: Expression -> [OpCode]
 getExp (ValueExpr x) = undefined
 getExp (Plus (NumValue x) (NumValue y)) = [RESET D] ++ 
-    (generateIncCode ((valueOf x)+ (valueOf y))  [STORE D] D) 
+    (generateIncCode ((valueOf x)+ (valueOf y)-1)[INC D]  D) 
 getExp (Minus (NumValue x) (NumValue y)) = [RESET D] ++ 
-    (generateIncCode ((valueOf x) - (valueOf y))  [STORE D] D) 
+    (generateIncCode ((valueOf x) - (valueOf y) -1)  [INC D] D) 
 getExp (Times (NumValue x) (NumValue y)) = [RESET D] ++ 
-    (generateIncCode ((valueOf x) * (valueOf y))  [STORE D] D) 
+    (generateIncCode ((valueOf x) * (valueOf y)-1 )  [INC D] D) 
 getExp (Div (NumValue x) (NumValue y)) = [RESET D] ++ 
-    (generateIncCode ((valueOf x) `div` (valueOf y))  [STORE D] D) 
+    (generateIncCode ((valueOf x) `div` (valueOf y) -1)  [INC D] D) 
 getExp (Mod (NumValue x) (NumValue y)) = [RESET D] ++ 
-    (generateIncCode ((valueOf x) `mod`  (valueOf y))  [STORE D] D) 
+    (generateIncCode ((valueOf x) `mod`  (valueOf y)-1)  [INC D] D) 

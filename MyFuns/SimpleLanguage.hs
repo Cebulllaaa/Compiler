@@ -19,6 +19,7 @@ type CodePos = Int
 
 type Code = Seq OpCode
 
+
 data OpCode
     = HALT
     | GET
