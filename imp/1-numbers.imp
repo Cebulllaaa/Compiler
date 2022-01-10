@@ -29,7 +29,7 @@ BEGIN
 	READ h;
 	i ASSIGN 1;
 	j ASSIGN h PLUS c;
-	
+
 	WRITE j; ( j = h + 15 )
 	WRITE c; ( c = 15 )
 	WRITE t[-3]; ( -999 )

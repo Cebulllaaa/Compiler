@@ -45,8 +45,8 @@ extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
 #line 8 "parser.y"
- 
-#include<vector> 
+
+#include<vector>
 #include<utility>
 using namespace std;
 

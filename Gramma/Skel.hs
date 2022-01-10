@@ -36,7 +36,6 @@ transCommand :: Gramma.Abs.Command -> Result
 transCommand x = case x of
   Gramma.Abs.Assign identifier expression -> failure x
   Gramma.Abs.IfElse condition commands1 commands2 -> failure x
-  Gramma.Abs.IfElseSkip condition commands -> failure x
   Gramma.Abs.While condition commands -> failure x
   Gramma.Abs.Repeat commands condition -> failure x
   Gramma.Abs.ForTo pidentifier value1 value2 commands -> failure x

@@ -2,8 +2,8 @@
 VAR
   a, b[10:10]
 BEGIN
-  FOR i FROM 0 TO 9 DO 
-    b[i] ASSIGN i TIMES i;
+  FOR i FROM 0 TO 9 DO
+  b[i] ASSIGN i TIMES i;
   ENDFOR
   a ASSIGN b[i];
 END

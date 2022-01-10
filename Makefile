@@ -17,7 +17,7 @@ ALEX_OPTS  = --ghc
 all : Gramma/Abs.hs Gramma/Layout.hs Gramma/Lex.hs \
 	Gramma/Par.hs Gramma/Print.hs Gramma/Doc.txt \
 	Gramma/Par.info MyFuns bin/Compiler bin/Test  \
-	clean  
+	clean
 
 # Rules for building the parser.
 
@@ -36,10 +36,10 @@ Gramma/Par.info : Gramma/Lex.hs Gramma/Par.hs
 Gramma/Test : Gramma/Abs.hs Gramma/Layout.hs grammar/Gramma/Lex.hs Gramma/Par.hs Gramma/Print.hs Gramma/Test.hs
 	${GHC}  $@
 
-MyFuns/Flow.hs : MyFuns/Flow.hs 
+MyFuns/Flow.hs : MyFuns/Flow.hs
 	${GHC}  $@
-	
-bin/Compiler : Main.hs 
+
+bin/Compiler : Main.hs
 	${GHC} ${GHC_OPTS} $<
 
 bin/Test : Gramma/Test.hs

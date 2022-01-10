@@ -5,8 +5,8 @@
  * http://ki.pwr.edu.pl/gebala/
  * 2021-11-12
 */
-%code requires { 
-#include<vector> 
+%code requires {
+#include<vector>
 #include<utility>
 using namespace std;
 }
@@ -57,7 +57,7 @@ void yyerror( vector< pair<int,int> > & program, char const *s )
   exit(-1);
 }
 
-void run_parser( vector< pair<int,int> > & program, FILE * data ) 
+void run_parser( vector< pair<int,int> > & program, FILE * data )
 {
   cout << cBlue << "Czytanie kodu." << cReset << endl;
   yyset_in( data );

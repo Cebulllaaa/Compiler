@@ -24,15 +24,15 @@ int main( int argc, char const * argv[] )
 
   if( argc!=2 )
   {
-    cerr << cRed << "Sposób użycia programu: interpreter kod" << cReset << endl;
-    return -1;
+  rr << cRed << "Sposób użycia programu: interpreter kod" << cReset << endl;
+  turn -1;
   }
 
   data = fopen( argv[1], "r" );
   if( !data )
   {
-    cerr << cRed << "Błąd: Nie można otworzyć pliku " << argv[1] << cReset << endl;
-    return -1;
+  rr << cRed << "Błąd: Nie można otworzyć pliku " << argv[1] << cReset << endl;
+  turn -1;
   }
 
   run_parser( program, data );
