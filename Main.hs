@@ -5,12 +5,13 @@ import Data.Text.IO as TIO (readFile, writeFile)
 import qualified Data.Map as M (Map, empty, insert)
 import Data.Text as T (Text, pack, unlines)
 import Gramma.Par (pProgram, myLexer)
-import MyFuns.Numbers (generateIncCode, valueOf, getExpression, getValue, getIdAddr)
-import MyFuns.Flow (genCond, genUntilCode)
+import MyFuns.Numbers (VarInfo(..), SymbolTable, valueOf, getExpression, getValue, getIdAddr)
+import MyFuns.Flow (genCond)
 import Gramma.Abs
 import Debug.Trace
 import MyFuns.SimpleLanguage
 import Data.List (genericLength)
+import Control.Exception (catch, ErrorCall(..))
 
 optimize :: Program -> Program
 optimize = id
@@ -22,25 +23,20 @@ generateCommands :: SymbolTable -> [Command] -> [OpCode]
 generateCommands = concatMap . generateCommand
 
 generateCommand :: SymbolTable -> Command -> [OpCode]
-generateCommand st (Write x) =
-  getValue A x ++ [PUT]
-generateCommand st (Write (IdValue x)) = [RESET A] ++ [SWAP D]  ++[PUT]
+generateCommand st (Assign id exp) =
+  getIdAddr st B id ++ getExpression st exp ++ [SWAP C, STORE B]
 generateCommand st (IfElse cond cmdsI cmdsE) =
-  genCond cond (CodePos (genericLength blockIf + 1)) ++
-    blockIf ++ generateCommands st cmdsE
+  genCond st cond (\_ -> generateCommands st cmdsI) (\_ -> generateCommands st cmdsE)
+generateCommand st (While cond body) =
+  genCond st cond (\_ -> generateCommands st body) (\offset -> [JUMP (CodePos (negate offset))])
+generateCommand st (Repeat body cond) =
+  bodyCode ++ genCond st cond (\_ -> []) (\o -> [JUMP (CodePos (start o))])
   where
-    blockIf = generateCommands st cmdsI
-generateCommand st (Assign id exp) = getIdAddr B id ++ getExpression exp ++ [STORE B]
-generateCommand st (Read id) = []
-generateCommand st (Repeat cmds cond) = body ++ genUntilCode cond (genericLength body)
-  where
-    body = concatMap (generateCommand st) cmds
-
-data VarInfo
-  = ScalarInfo {address :: Integer}
-  | ArrayInfo {address :: Integer, begin :: Integer, end :: Integer}
-
-type SymbolTable = M.Map Pidentifier VarInfo
+    bodyCode = generateCommands st body
+    bodyLen = genericLength bodyCode
+    start offset = negate offset - bodyLen
+generateCommand st (Read id) = getIdAddr st B id ++ [GET, STORE B]
+generateCommand st (Write x) = getValue st B x ++ [SWAP B, PUT]
 
 generateSymbolTable :: Integer -> [Declaration] -> SymbolTable
 generateSymbolTable _ [] = M.empty
@@ -74,4 +70,5 @@ main = do
           let analizedTree = analize abstractSyntaxTree
           let optimizedTree = optimize analizedTree
           let generatedCode = generateCode optimizedTree ++ [HALT]
-          TIO.writeFile outputPath $ T.unlines $ showText <$> generatedCode
+          catch (TIO.writeFile outputPath $ T.unlines $ showText <$> generatedCode) $
+            \(ErrorCall e) -> putStrLn e
