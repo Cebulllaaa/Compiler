@@ -1,8 +1,14 @@
-RESET a
-DEC a
-JNEG 5
-RESET h
-INC h
-SWAP h
+RESET b
+INC b
+INC b
+RESET c
+INC c
+SWAP b
+SUB c
+JPOS 2
+JUMP 5
+RESET b
+INC b
+SWAP b
 PUT
 HALT

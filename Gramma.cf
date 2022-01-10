@@ -24,6 +24,7 @@ ArrayDecl.  Declaration ::= Pidentifier "[" Number ":" Number "]" ;
 
 separator nonempty Command "" ;
 
+internal Iter. Command ::= Identifier "ITER_ASSIGN" Expression ";" ;
 Assign.     Command ::= Identifier "ASSIGN" Expression ";" ;
 IfElse.     Command ::= "IF" Condition "THEN" [Command] "ELSE" [Command] "ENDIF" ;
 ifElseSkip. Command ::= "IF" Condition "THEN" [Command] "ENDIF" ;

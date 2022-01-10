@@ -20,7 +20,8 @@ data Declaration
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Command
-    = Assign Identifier Expression
+    = Iter Identifier Expression
+    | Assign Identifier Expression
     | IfElse Condition [Command] [Command]
     | While Condition [Command]
     | Repeat [Command] Condition

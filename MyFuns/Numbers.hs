@@ -16,6 +16,7 @@ import Data.Map as M (Map, lookup)
 
 data VarInfo
   = ScalarInfo {address :: Integer}
+  | IterInfo {address :: Integer}
   | ArrayInfo {address :: Integer, begin :: Integer, end :: Integer}
 
 type SymbolTable = M.Map Pidentifier VarInfo
@@ -49,21 +50,26 @@ getValue _ reg (NumValue x) = getNumber reg x
 getValue st reg (IdValue x) = getIdValue st reg x
 
 getIdValue :: SymbolTable -> Reg -> Identifier -> [OpCode]
-getIdValue st reg ident = getIdAddr st reg ident ++ [LOAD reg, SWAP reg]
+getIdValue st reg ident = getIdAddr False st reg ident ++ [LOAD reg, SWAP reg]
 
-getIdAddr :: SymbolTable -> Reg -> Identifier -> [OpCode]
-getIdAddr st reg (ScalarId pid@(Pidentifier txt)) =
+getIdAddr :: Bool -> SymbolTable -> Reg -> Identifier -> [OpCode]
+getIdAddr mutation st reg (ScalarId pid@(Pidentifier txt)) =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
     Just (ScalarInfo addr) -> generateConstant reg addr
+    Just (IterInfo addr) ->
+      if mutation then
+        error $ "iterator cannot be modified: " ++ T.unpack txt
+      else
+        generateConstant reg addr
     Just _ -> error $ "array used as scalar: " ++ T.unpack txt
-getIdAddr st reg (VarArrayId pid@(Pidentifier txt) pid') =
+getIdAddr _ st reg (VarArrayId pid@(Pidentifier txt) pid') =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
     Just (ArrayInfo addr beg end) ->
       getIdValue st E (ScalarId pid') ++ generateConstant reg (addr - beg) ++ [SWAP reg, ADD E, LOAD A, SWAP reg]
     Just _ -> error $ "scalar used as array: " ++ T.unpack txt
-getIdAddr st reg (ConstArrayId pid@(Pidentifier txt) (valueOf -> index)) =
+getIdAddr _ st reg (ConstArrayId pid@(Pidentifier txt) (valueOf -> index)) =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
     Just (ArrayInfo addr beg end) ->
