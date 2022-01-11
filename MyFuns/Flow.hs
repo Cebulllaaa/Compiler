@@ -3,7 +3,7 @@ module MyFuns.Flow (
 ) where
 import MyFuns.SimpleLanguage
 import Gramma.Abs
-import MyFuns.Numbers (SymbolTable, valueOf, getValue)
+import MyFuns.Values 
 import Debug.Trace
 import Data.List (genericLength)
 

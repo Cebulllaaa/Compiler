@@ -1,9 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 module MyFuns.Numbers (
-  VarInfo(..),
-  SymbolTable,
-  valueOf,
   getExpression,
+  generateWhile,
   getValue,
   getIdAddr
 ) where
@@ -11,82 +9,18 @@ module MyFuns.Numbers (
 import MyFuns.SimpleLanguage
 import Gramma.Abs
 import Data.Text as T (unpack)
-import Data.List (genericReplicate)
-import Data.Map as M (Map, lookup)
-import Debug.Trace 
+import Data.List (genericReplicate, genericLength)
+import MyFuns.Flow (genCond)
+import MyFuns.Values 
 
-data VarInfo
-  = ScalarInfo {address :: Integer}
-  | IterInfo {address :: Integer}
-  | ArrayInfo {address :: Integer, begin :: Integer, end :: Integer}
 
-type SymbolTable = M.Map Pidentifier VarInfo
-
-valueOf :: Number -> Integer
-valueOf (Number txt) = read $ unpack txt
-
-maxSmallNumber :: Integer
-maxSmallNumber = 3
-
--- | DO NOT USE REGISTER A
-generateConstant :: Reg -> Integer -> [OpCode]
-generateConstant A _ = error "register A is forbidden here"
-generateConstant reg n
-  | n >= 0 && n <= maxSmallNumber = [RESET reg] ++ genericReplicate n (INC reg)
-  | n < 0 && n >= negate maxSmallNumber = [RESET reg] ++ genericReplicate n (DEC reg)
-generateConstant reg n = [RESET reg, INC reg, RESET A] ++ gen n ++ [SWAP reg]
-  where
-    gen (-1) = [DEC A]
-    gen 0 = []
-    gen 1 = [INC A]
-    gen k = gen q ++ [SHIFT reg] ++ gen r
-      where
-        (q, r) = quotRem k 2
-
-getNumber :: Reg -> Number -> [OpCode]
-getNumber reg x = generateConstant reg (valueOf x)
-
-getValue :: SymbolTable -> Reg -> Value -> [OpCode]
-getValue _ reg (NumValue x) = getNumber reg x
-getValue st reg (IdValue x) = getIdValue st reg x
-
-getIdValue :: SymbolTable -> Reg -> Identifier -> [OpCode]
-getIdValue st reg ident = getIdAddr False st reg ident ++ [LOAD reg, SWAP reg]
-
-getIdAddr :: Bool -> SymbolTable -> Reg -> Identifier -> [OpCode]
-getIdAddr mutation st reg (LimitId pid@(Pidentifier txt)) =
-  case M.lookup pid st of
-    Just (IterInfo addr) ->
-      if mutation then
-        error $ "iterator cannaddrot be modified: " ++ T.unpack txt
-      else
-        generateConstant reg (addr + 1)
-    _ -> error $ "internal error: " ++ T.unpack txt
-getIdAddr mutation st reg (ScalarId pid@(Pidentifier txt)) =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
-    Just (ScalarInfo addr) -> generateConstant reg addr
-    Just (IterInfo addr) ->
-      if mutation then
-        error $ "iterator cannot be modified: " ++ T.unpack txt
-      else
-        generateConstant reg addr
-    Just _ -> error $ "array used as scalar: " ++ T.unpack txt
-getIdAddr _ st reg (VarArrayId pid@(Pidentifier txt) pid') =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
-    Just (ArrayInfo addr beg end) ->
-      getIdValue st E (ScalarId pid') ++ generateConstant reg (addr - beg) ++ [SWAP reg, ADD E, SWAP reg]
-    Just _ -> error $ "scalar used as array: " ++ T.unpack txt
-getIdAddr _ st reg (ConstArrayId pid@(Pidentifier txt) (valueOf -> index)) =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
-    Just (ArrayInfo addr beg end) ->
-      if beg <= index && index <= end then
-        generateConstant reg (addr - beg + index)
-      else
-        error $ "index out of range: " ++ T.unpack txt ++ "[" ++ show index ++ "]"
-    Just _ -> error $ "scalar used as array: " ++ T.unpack txt
+generateWhile :: (Integer -> [OpCode]) -> [OpCode] -> [OpCode]
+generateWhile codeC codeB =
+  codeC' ++ codeB ++ [JUMP (CodePos (negate (lenC + lenB)))]
+    where
+      codeC' = codeC (lenB + 1)
+      lenC = genericLength codeC'
+      lenB = genericLength codeB
 
 -- | GIVES VALUE IN REGISTER A
 getExpression :: SymbolTable -> Expression -> [OpCode]
@@ -105,4 +39,45 @@ getExpression st (Plus x y) =
   getValue st C x ++ getValue st D y ++ [SWAP C, ADD D]
 getExpression st (Minus x y) =
   getValue st C x ++ getValue st D y ++ [SWAP C, SUB D]
-getExpression _ _ = undefined
+getExpression st (Times x y) =
+  getValue st C x ++ getValue st D y ++
+  [RESET G, DEC G, RESET H, INC H, RESET E] ++
+  generateWhile (\skip -> [RESET A, ADD C, JZERO (CodePos (skip + 1))])
+    [RESET A, ADD C, SHIFT G, SHIFT H, SUB C, JZERO 4,
+     SWAP E, ADD D, SWAP E,
+     SWAP C, SHIFT G, SWAP C, SWAP D, SHIFT H, SWAP D]
+  ++ [SWAP E]
+getExpression st (Div x y) =
+  getValue st C x ++ getValue st D y ++ 
+  [RESET G, DEC G, RESET H, INC H, RESET E] ++
+  [SWAP D, JZERO (CodePos (1 + 14 + 8 + 20 + 1)), SWAP D] ++
+  generateWhile (\skip ->
+    [RESET A, ADD D, SHIFT G, SHIFT H, SUB D,
+     JZERO 2, JUMP (CodePos (skip + 1))])
+    [SWAP C, SHIFT G, SWAP C, SWAP D, SHIFT G, SWAP D] ++
+  generateWhile (\skip ->
+    [RESET A, ADD C, SUB D, JNEG (CodePos (skip + 1))])
+    [SWAP D, SHIFT H, SWAP D] ++
+  generateWhile (\skip ->
+    [RESET A, ADD D, SHIFT G, SHIFT H, SUB D,
+     JZERO 2, JUMP (CodePos (skip + 1))])
+    [SWAP E, SHIFT H, SWAP E, SWAP D, SHIFT G, SWAP D, 
+    RESET A, ADD C, SUB D, JNEG 3, SWAP C, INC E] ++ 
+  [SWAP E]
+
+
+
+
+
+
+getExpression st (Mod x y) =
+  getValue st C x ++ getValue st D y ++
+  [RESET G, DEC G, RESET H, INC H, RESET E] ++
+  [RESET A, ADD D, JZERO (CodePos (9+14+5+1))] ++
+  generateWhile (\skip -> [RESET A, ADD C, SUB D, JNEG (CodePos (skip + 1))])
+    [SWAP D, SHIFT H, SWAP D, INC E] ++
+  generateWhile (\skip ->
+    [RESET A, ADD E, JPOS (CodePos 2), JUMP (CodePos (skip +1))])
+    [RESET A, ADD C, SUB D, JNEG 2, SWAP C, SWAP D, SHIFT G, SWAP D, DEC E] ++
+  [RESET A, ADD C, SUB D, JNEG 3, JUMP 3, RESET C, SWAP C]
+

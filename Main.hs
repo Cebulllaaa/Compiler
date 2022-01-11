@@ -5,11 +5,12 @@ import Data.Text.IO as TIO (readFile, writeFile)
 import qualified Data.Map as M (Map, empty, insert, foldl')
 import Data.Text as T (Text, pack, unlines)
 import Gramma.Par (pProgram, myLexer)
-import MyFuns.Numbers (VarInfo(..), SymbolTable, valueOf, getExpression, getValue, getIdAddr)
-import MyFuns.Flow (genCond)
+import MyFuns.Numbers 
+import MyFuns.Flow 
 import Gramma.Abs
 import Debug.Trace
 import MyFuns.SimpleLanguage
+import MyFuns.Values
 import Data.List (genericLength)
 import Control.Exception (catch, ErrorCall(..))
 import Data.Semigroup (Max(..))
@@ -26,14 +27,6 @@ generateCommands = concatMap . generateCommand
 generateIter :: SymbolTable -> SymbolTable -> Identifier -> Expression -> [OpCode]
 generateIter st1 st2 id exp =
   getIdAddr False st1 B id ++ getExpression st2 exp ++ [STORE B]
-
-generateWhile :: (Integer -> [OpCode]) -> [OpCode] -> [OpCode]
-generateWhile codeC codeB =
-  codeC' ++ codeB ++ [JUMP (CodePos (negate (lenC + lenB)))]
-    where
-      codeC' = codeC (lenB + 1)
-      lenC = genericLength codeC'
-      lenB = genericLength codeB
 
 generateFor :: SymbolTable -> Pidentifier -> Value -> Value -> [Command] -> Bool -> [OpCode]
 generateFor st pid from to body up =

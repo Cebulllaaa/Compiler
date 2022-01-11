@@ -1,0 +1,8 @@
+VAR 
+    n , b, x
+BEGIN
+    READ n;
+    READ b;
+    x ASSIGN b TIMES n;
+    WRITE x;
+END
