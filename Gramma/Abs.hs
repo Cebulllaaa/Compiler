@@ -20,8 +20,7 @@ data Declaration
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Command
-    = Iter Identifier Expression
-    | Assign Identifier Expression
+    = Assign Identifier Expression
     | IfElse Condition [Command] [Command]
     | While Condition [Command]
     | Repeat [Command] Condition
@@ -53,7 +52,8 @@ data Value = NumValue Number | IdValue Identifier
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Identifier
-    = ScalarId Pidentifier
+    = LimitId Pidentifier
+    | ScalarId Pidentifier
     | VarArrayId Pidentifier Pidentifier
     | ConstArrayId Pidentifier Number
   deriving (C.Eq, C.Ord, C.Show, C.Read)

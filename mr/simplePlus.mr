@@ -1,8 +1,13 @@
-RESET d
-INC d
-INC d
-INC d
-RESET a
-SWAP d
+RESET b
+RESET c
+INC c
+INC c
+INC c
+SWAP c
+STORE b
+RESET b
+LOAD b
+SWAP b
+SWAP b
 PUT
 HALT

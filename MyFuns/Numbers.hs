@@ -13,6 +13,7 @@ import Gramma.Abs
 import Data.Text as T (unpack)
 import Data.List (genericReplicate)
 import Data.Map as M (Map, lookup)
+import Debug.Trace 
 
 data VarInfo
   = ScalarInfo {address :: Integer}
@@ -53,6 +54,14 @@ getIdValue :: SymbolTable -> Reg -> Identifier -> [OpCode]
 getIdValue st reg ident = getIdAddr False st reg ident ++ [LOAD reg, SWAP reg]
 
 getIdAddr :: Bool -> SymbolTable -> Reg -> Identifier -> [OpCode]
+getIdAddr mutation st reg (LimitId pid@(Pidentifier txt)) =
+  case M.lookup pid st of
+    Just (IterInfo addr) ->
+      if mutation then
+        error $ "iterator cannaddrot be modified: " ++ T.unpack txt
+      else
+        generateConstant reg (addr + 1)
+    _ -> error $ "internal error: " ++ T.unpack txt
 getIdAddr mutation st reg (ScalarId pid@(Pidentifier txt)) =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
@@ -67,35 +76,31 @@ getIdAddr _ st reg (VarArrayId pid@(Pidentifier txt) pid') =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
     Just (ArrayInfo addr beg end) ->
-      getIdValue st E (ScalarId pid') ++ generateConstant reg (addr - beg) ++ [SWAP reg, ADD E, LOAD A, SWAP reg]
+      getIdValue st E (ScalarId pid') ++ generateConstant reg (addr - beg) ++ [SWAP reg, ADD E, SWAP reg]
     Just _ -> error $ "scalar used as array: " ++ T.unpack txt
 getIdAddr _ st reg (ConstArrayId pid@(Pidentifier txt) (valueOf -> index)) =
   case M.lookup pid st of
     Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
     Just (ArrayInfo addr beg end) ->
       if beg <= index && index <= end then
-        generateConstant reg (addr - beg + index) ++ [SWAP reg, LOAD A, SWAP reg]
+        generateConstant reg (addr - beg + index)
       else
         error $ "index out of range: " ++ T.unpack txt ++ "[" ++ show index ++ "]"
     Just _ -> error $ "scalar used as array: " ++ T.unpack txt
 
--- | GIVES VALUE IN REGISTER C
+-- | GIVES VALUE IN REGISTER A
 getExpression :: SymbolTable -> Expression -> [OpCode]
-getExpression st (ValueExpr x) = getValue st C x
+getExpression st (ValueExpr x) = getValue st C x ++ [SWAP C]
 getExpression _ (Plus (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x + valueOf y)
+  generateConstant C (valueOf x + valueOf y) ++ [SWAP C]
 getExpression _ (Minus (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x - valueOf y)
+  generateConstant C (valueOf x - valueOf y) ++ [SWAP C]
 getExpression _ (Times (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x * valueOf y)
+  generateConstant C (valueOf x * valueOf y) ++ [SWAP C]
 getExpression _ (Div (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x `quot` valueOf y)
+  generateConstant C (valueOf x `quot` valueOf y) ++ [SWAP C]
 getExpression _ (Mod (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x `rem` valueOf y)
-getExpression _ (Plus (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x + valueOf y)
-getExpression _ (Minus (NumValue x) (NumValue y)) =
-  generateConstant C (valueOf x - valueOf y)
+  generateConstant C (valueOf x `rem` valueOf y) ++ [SWAP C]
 getExpression st (Plus x y) =
   getValue st C x ++ getValue st D y ++ [SWAP C, ADD D]
 getExpression st (Minus x y) =

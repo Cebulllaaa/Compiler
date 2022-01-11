@@ -1,0 +1,9 @@
+VAR
+    n
+BEGIN
+    n ASSIGN 0;
+    WHILE n LEQ 2 DO
+        WRITE n;
+        n ASSIGN n PLUS 1;
+    ENDWHILE
+END

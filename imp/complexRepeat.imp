@@ -1,0 +1,13 @@
+VAR
+  n, p
+BEGIN
+  READ n;
+  IF n GEQ 0 THEN
+	REPEAT
+	    p ASSIGN n PLUS 2;
+	    WRITE p;
+	    n ASSIGN n MINUS 1;
+        WRITE n;
+	UNTIL n EQ 0;
+  ENDIF
+END

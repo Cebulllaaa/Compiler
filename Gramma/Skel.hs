@@ -34,7 +34,6 @@ transDeclaration x = case x of
 
 transCommand :: Gramma.Abs.Command -> Result
 transCommand x = case x of
-  Gramma.Abs.Iter identifier expression -> failure x
   Gramma.Abs.Assign identifier expression -> failure x
   Gramma.Abs.IfElse condition commands1 commands2 -> failure x
   Gramma.Abs.While condition commands -> failure x
@@ -69,6 +68,7 @@ transValue x = case x of
 
 transIdentifier :: Gramma.Abs.Identifier -> Result
 transIdentifier x = case x of
+  Gramma.Abs.LimitId pidentifier -> failure x
   Gramma.Abs.ScalarId pidentifier -> failure x
   Gramma.Abs.VarArrayId pidentifier1 pidentifier2 -> failure x
   Gramma.Abs.ConstArrayId pidentifier number -> failure x

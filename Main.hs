@@ -23,39 +23,54 @@ analize = id
 generateCommands :: SymbolTable -> [Command] -> [OpCode]
 generateCommands = concatMap . generateCommand
 
+generateIter :: SymbolTable -> SymbolTable -> Identifier -> Expression -> [OpCode]
+generateIter st1 st2 id exp =
+  getIdAddr False st1 B id ++ getExpression st2 exp ++ [STORE B]
+
+generateWhile :: (Integer -> [OpCode]) -> [OpCode] -> [OpCode]
+generateWhile codeC codeB =
+  codeC' ++ codeB ++ [JUMP (CodePos (negate (lenC + lenB)))]
+    where
+      codeC' = codeC (lenB + 1)
+      lenC = genericLength codeC'
+      lenB = genericLength codeB
+
+generateFor :: SymbolTable -> Pidentifier -> Value -> Value -> [Command] -> Bool -> [OpCode]
+generateFor st pid from to body up =
+  generateIter st' st iter (ValueExpr from) ++
+  generateIter st' st limit (ValueExpr to) ++
+  generateWhile (genCond st' ((if up then Leq else Geq) (IdValue iter) (IdValue limit))) (
+    generateCommands st' body ++ generateIter st' st' iter step)
+  where
+    st' = M.insert pid (IterInfo (getFreeMem st)) st
+    iter = ScalarId pid
+    limit = LimitId pid
+    step = (if up then Plus else Minus) (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1")))
+
+
 generateCommand :: SymbolTable -> Command -> [OpCode]
-generateCommand st (Iter id exp) =
-  getIdAddr False st B id ++ getExpression st exp ++ [SWAP C, STORE B]
 generateCommand st (Assign id exp) =
-  getIdAddr True st B id ++ getExpression st exp ++ [SWAP C, STORE B]
+  getIdAddr True st B id ++ getExpression st exp ++ [STORE B]
 generateCommand st (IfElse cond cmdsI cmdsE) =
-  genCond st cond (\_ -> generateCommands st cmdsI) (\_ -> generateCommands st cmdsE)
+  genCond st cond (lenI + 1) ++ codeI ++ [JUMP (CodePos (lenE + 1))] ++ codeE
+    where
+      codeI = generateCommands st cmdsI
+      lenI = genericLength codeI
+      codeE = generateCommands st cmdsE
+      lenE = genericLength codeE
 generateCommand st (While cond body) =
-  genCond st cond (\_ -> generateCommands st body) (\offset -> [JUMP (CodePos (negate offset))])
+  generateWhile (genCond st cond) (generateCommands st body)
 generateCommand st (Repeat body cond) =
-  bodyCode ++ genCond st cond (\_ -> []) (\o -> [JUMP (CodePos (start o))])
-  where
-    bodyCode = generateCommands st body
-    bodyLen = genericLength bodyCode
-    start offset = negate offset - bodyLen
+  codeB ++ codeC
+    where
+      codeB = generateCommands st body
+      lenB = genericLength codeB
+      codeC = genCond st cond (negate (lenB + lenC - 1))
+      lenC = genericLength codeC
 generateCommand st (ForTo pid from to body) =
-  generateCommands st' [
-    Iter (ScalarId pid) (ValueExpr from),
-    While (Leq (IdValue (ScalarId pid)) to) $
-      body ++
-        [Iter (ScalarId pid) (Plus (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1"))))]
-  ]
-  where
-    st' = M.insert pid (IterInfo (getFreeMem st)) st
+  generateFor st pid from to body True
 generateCommand st (ForDownTo pid from to body) =
-  generateCommands st' [
-    Iter (ScalarId pid) (ValueExpr from),
-    While (Geq (IdValue (ScalarId pid)) to) $
-      body ++
-        [Iter (ScalarId pid) (Minus (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1"))))]
-  ]
-  where
-    st' = M.insert pid (IterInfo (getFreeMem st)) st
+  generateFor st pid from to body False
 generateCommand st (Read id) = getIdAddr True st B id ++ [GET, STORE B]
 generateCommand st (Write x) = getValue st B x ++ [SWAP B, PUT]
 
@@ -63,7 +78,7 @@ getFreeMem :: SymbolTable -> Integer
 getFreeMem st = M.foldl' (\a x -> getAddress x `max` a) 0 st
   where
     getAddress (ScalarInfo a) = a + 1
-    getAddress (IterInfo a) = a + 1
+    getAddress (IterInfo a) = a + 2
     getAddress (ArrayInfo a b e) = a + e - b + 1
 
 generateSymbolTable :: Integer -> [Declaration] -> SymbolTable

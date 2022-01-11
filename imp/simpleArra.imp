@@ -1,0 +1,8 @@
+VAR 
+n[2:5]
+BEGIN
+    FOR i FROM 2 TO 5 DO
+        n[i] ASSIGN i ;
+        WRITE n[i] ;
+    ENDFOR
+END

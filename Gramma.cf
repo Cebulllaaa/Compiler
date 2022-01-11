@@ -24,7 +24,6 @@ ArrayDecl.  Declaration ::= Pidentifier "[" Number ":" Number "]" ;
 
 separator nonempty Command "" ;
 
-internal Iter. Command ::= Identifier "ITER_ASSIGN" Expression ";" ;
 Assign.     Command ::= Identifier "ASSIGN" Expression ";" ;
 IfElse.     Command ::= "IF" Condition "THEN" [Command] "ELSE" [Command] "ENDIF" ;
 ifElseSkip. Command ::= "IF" Condition "THEN" [Command] "ENDIF" ;
@@ -54,6 +53,7 @@ Geq. Condition ::= Value "GEQ" Value ;
 NumValue. Value ::= Number ;
 IdValue.  Value ::= Identifier ;
 
+internal LimitId. Identifier ::= "LIMIT" Pidentifier ;
 ScalarId. Identifier ::= Pidentifier ;
 VarArrayId. Identifier ::= Pidentifier "[" Pidentifier "]" ;
 ConstArrayId. Identifier ::= Pidentifier "[" Number "]" ;

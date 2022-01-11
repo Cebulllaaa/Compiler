@@ -164,7 +164,6 @@ instance Print [Gramma.Abs.Command] where
 
 instance Print Gramma.Abs.Command where
   prt i = \case
-    Gramma.Abs.Iter identifier expression -> prPrec i 0 (concatD [prt 0 identifier, doc (showString "ITER_ASSIGN"), prt 0 expression, doc (showString ";")])
     Gramma.Abs.Assign identifier expression -> prPrec i 0 (concatD [prt 0 identifier, doc (showString "ASSIGN"), prt 0 expression, doc (showString ";")])
     Gramma.Abs.IfElse condition commands1 commands2 -> prPrec i 0 (concatD [doc (showString "IF"), prt 0 condition, doc (showString "THEN"), prt 0 commands1, doc (showString "ELSE"), prt 0 commands2, doc (showString "ENDIF")])
     Gramma.Abs.While condition commands -> prPrec i 0 (concatD [doc (showString "WHILE"), prt 0 condition, doc (showString "DO"), prt 0 commands, doc (showString "ENDWHILE")])
@@ -199,6 +198,7 @@ instance Print Gramma.Abs.Value where
 
 instance Print Gramma.Abs.Identifier where
   prt i = \case
+    Gramma.Abs.LimitId pidentifier -> prPrec i 0 (concatD [doc (showString "LIMIT"), prt 0 pidentifier])
     Gramma.Abs.ScalarId pidentifier -> prPrec i 0 (concatD [prt 0 pidentifier])
     Gramma.Abs.VarArrayId pidentifier1 pidentifier2 -> prPrec i 0 (concatD [prt 0 pidentifier1, doc (showString "["), prt 0 pidentifier2, doc (showString "]")])
     Gramma.Abs.ConstArrayId pidentifier number -> prPrec i 0 (concatD [prt 0 pidentifier, doc (showString "["), prt 0 number, doc (showString "]")])
