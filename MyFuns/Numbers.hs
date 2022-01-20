@@ -65,11 +65,6 @@ getExpression st (Div x y) =
     RESET A, ADD C, SUB D, JNEG 3, SWAP C, INC E] ++ 
   [SWAP E]
 
-
-
-
-
-
 getExpression st (Mod x y) =
   getValue st C x ++ getValue st D y ++
   [RESET G, DEC G, RESET H, INC H, RESET E] ++

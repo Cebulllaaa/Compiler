@@ -1,8 +1,6 @@
 {-
 Gramma
 Author: Bartosz Cybulski
-
-
 -}
 
 entrypoints Program ;

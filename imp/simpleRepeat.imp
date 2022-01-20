@@ -1,5 +1,0 @@
-BEGIN
-  REPEAT
-  WRITE 1;
-  UNTIL 1 EQ 1;
-END

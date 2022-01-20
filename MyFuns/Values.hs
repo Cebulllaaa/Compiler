@@ -61,7 +61,7 @@ getIdAddr mutation st reg (LimitId pid@(Pidentifier txt)) =
   case M.lookup pid st of
     Just (IterInfo addr) ->
       if mutation then
-        error $ "iterator cannaddrot be modified: " ++ T.unpack txt
+        error $ "iterator cannot be modified: " ++ T.unpack txt
       else
         generateConstant reg (addr + 1)
     _ -> error $ "internal error: " ++ T.unpack txt

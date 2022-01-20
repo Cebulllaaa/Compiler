@@ -1,0 +1,6 @@
+( Błąd w linii 5: użycie niezainicjowanej zmiennej a tak jak w 3)
+VAR
+  a
+BEGIN
+  WRITE a;
+END
