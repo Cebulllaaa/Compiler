@@ -140,7 +140,7 @@ instance Print Double where
   prt _ x = doc (shows x)
 
 instance Print Gramma.Abs.Pidentifier where
-  prt _ (Gramma.Abs.Pidentifier i) = doc $ showString (Data.Text.unpack i)
+  prt _ (Gramma.Abs.Pidentifier (_,i)) = doc $ showString (Data.Text.unpack i)
 instance Print Gramma.Abs.Number where
   prt _ (Gramma.Abs.Number i) = doc $ showString (Data.Text.unpack i)
 instance Print Gramma.Abs.Program where

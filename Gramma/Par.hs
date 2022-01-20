@@ -194,9 +194,9 @@ happy_n_nonterms = 11 :: Int
 
 happyReduce_1 = happySpecReduce_1  0# happyReduction_1
 happyReduction_1 happy_x_1
-	 =  case happyOutTok happy_x_1 of { (PT _ (T_Pidentifier happy_var_1)) -> 
+	 =  case happyOutTok happy_x_1 of { happy_var_1 -> 
 	happyIn4
-		 (Gramma.Abs.Pidentifier happy_var_1
+		 (Gramma.Abs.Pidentifier (mkPosToken happy_var_1)
 	)}
 
 happyReduce_2 = happySpecReduce_1  1# happyReduction_2
@@ -610,7 +610,7 @@ happyNewToken action sts stk (tk:tks) =
 	PT _ (TS _ 34) -> cont 34#;
 	PT _ (TS _ 35) -> cont 35#;
 	PT _ (TS _ 36) -> cont 36#;
-	PT _ (T_Pidentifier happy_dollar_dollar) -> cont 37#;
+	PT _ (T_Pidentifier _) -> cont 37#;
 	PT _ (T_Number happy_dollar_dollar) -> cont 38#;
 	_ -> happyError' ((tk:tks), [])
 	}

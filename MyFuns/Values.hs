@@ -16,6 +16,7 @@ import MyFuns.SimpleLanguage
 import Gramma.Abs
 import Data.List (genericLength)
 import Data.List (genericReplicate)
+import Data.Text (Text)
 
 data VarInfo
   = ScalarInfo {address :: Integer}
@@ -42,7 +43,7 @@ generateConstant reg n = [RESET reg, INC reg, RESET A] ++ gen n ++ [SWAP reg]
       where
         (q, r) = quotRem k 2
 
-type SymbolTable = M.Map Pidentifier VarInfo
+type SymbolTable = M.Map Text VarInfo
 valueOf :: Number -> Integer
 valueOf (Number txt) = read $ unpack txt
 
@@ -56,38 +57,45 @@ getNumber reg x = generateConstant reg (valueOf x)
 getIdValue :: SymbolTable -> Reg -> Identifier -> [OpCode]
 getIdValue st reg ident = getIdAddr False st reg ident ++ [LOAD reg, SWAP reg]
 
+message :: Pidentifier -> String -> String
+message (Pidentifier ((line, col), txt)) msg =
+  show line ++ ":" ++ show col ++ ": " ++ msg ++ ": " ++ T.unpack txt
+
+lookupVar :: Pidentifier -> SymbolTable -> Maybe VarInfo
+lookupVar (Pidentifier (_, txt)) st = M.lookup txt st
+
 getIdAddr :: Bool -> SymbolTable -> Reg -> Identifier -> [OpCode]
-getIdAddr mutation st reg (LimitId pid@(Pidentifier txt)) =
-  case M.lookup pid st of
+getIdAddr mutation st reg (LimitId pid) =
+  case lookupVar pid st of
     Just (IterInfo addr) ->
       if mutation then
-        error $ "iterator cannot be modified: " ++ T.unpack txt
+        error $ message pid "iterator cannot be modified"
       else
         generateConstant reg (addr + 1)
-    _ -> error $ "internal error: " ++ T.unpack txt
-getIdAddr mutation st reg (ScalarId pid@(Pidentifier txt)) =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
+    _ -> error $ message pid "internal error"
+getIdAddr mutation st reg (ScalarId pid) =
+  case lookupVar pid st of
+    Nothing -> error $ message pid "undeclared identifier"
     Just (ScalarInfo addr) -> generateConstant reg addr
     Just (IterInfo addr) ->
       if mutation then
-        error $ "iterator cannot be modified: " ++ T.unpack txt
+        error $ message pid "iterator cannot be modified"
       else
         generateConstant reg addr
-    Just _ -> error $ "array used as scalar: " ++ T.unpack txt
-getIdAddr _ st reg (VarArrayId pid@(Pidentifier txt) pid') =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
+    Just _ -> error $ message pid "array used as scalar"
+getIdAddr _ st reg (VarArrayId pid pid') =
+  case lookupVar pid st of
+    Nothing -> error $ message pid "undeclared identifier"
     Just (ArrayInfo addr beg end) ->
       getIdValue st E (ScalarId pid') ++ generateConstant reg (addr - beg) ++ [SWAP reg, ADD E, SWAP reg]
-    Just _ -> error $ "scalar used as array: " ++ T.unpack txt
-getIdAddr _ st reg (ConstArrayId pid@(Pidentifier txt) (valueOf -> index)) =
-  case M.lookup pid st of
-    Nothing -> error $ "undeclared identifier: " ++ T.unpack txt
+    Just _ -> error $ message pid "scalar used as array"
+getIdAddr _ st reg (ConstArrayId pid (valueOf -> index)) =
+  case lookupVar pid st of
+    Nothing -> error $ message pid $ "undeclared identifier"
     Just (ArrayInfo addr beg end) ->
       if beg <= index && index <= end then
         generateConstant reg (addr - beg + index)
       else
-        error $ "index out of range: " ++ T.unpack txt ++ "[" ++ show index ++ "]"
-    Just _ -> error $ "scalar used as array: " ++ T.unpack txt
+        error $ message pid "index out of range"  ++ "[" ++ show index ++ "]"
+    Just _ -> error $ message pid "scalar used as array" 
 

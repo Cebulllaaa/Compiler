@@ -6,14 +6,13 @@ Author: Bartosz Cybulski
 entrypoints Program ;
 comment "(" ")";
 
-token Pidentifier (letter | ["_"])+ ;
+position token Pidentifier (letter | ["_"])+ ;
 token Number      ["+-"]? digit+ ;
 
 Program.    Program ::= "VAR" [Declaration] "BEGIN" [Command] "END" ;
 simpleProg. Program ::= "BEGIN" [Command] "END" ;
 
 define simpleProg cmds = Program [] cmds ;
-
 
 separator nonempty Declaration "," ;
 

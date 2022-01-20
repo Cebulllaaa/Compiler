@@ -83,7 +83,7 @@ Terminals
 	'WRITE'        { PT _ (TS _ 34) }
 	'['            { PT _ (TS _ 35) }
 	']'            { PT _ (TS _ 36) }
-	L_Pidentifier  { PT _ (T_Pidentifier $$) }
+	L_Pidentifier  { PT _ (T_Pidentifier _) }
 	L_Number       { PT _ (T_Number $$) }
 
 -----------------------------------------------------------------------------

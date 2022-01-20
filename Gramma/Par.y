@@ -24,49 +24,49 @@ import qualified Data.Text
 %monad { Err } { (>>=) } { return }
 %tokentype {Token}
 %token
-  ','           { PT _ (TS _ 1)           }
-  ':'           { PT _ (TS _ 2)           }
-  ';'           { PT _ (TS _ 3)           }
-  'ASSIGN'      { PT _ (TS _ 4)           }
-  'BEGIN'       { PT _ (TS _ 5)           }
-  'DIV'         { PT _ (TS _ 6)           }
-  'DO'          { PT _ (TS _ 7)           }
-  'DOWNTO'      { PT _ (TS _ 8)           }
-  'ELSE'        { PT _ (TS _ 9)           }
-  'END'         { PT _ (TS _ 10)          }
-  'ENDFOR'      { PT _ (TS _ 11)          }
-  'ENDIF'       { PT _ (TS _ 12)          }
-  'ENDWHILE'    { PT _ (TS _ 13)          }
-  'EQ'          { PT _ (TS _ 14)          }
-  'FOR'         { PT _ (TS _ 15)          }
-  'FROM'        { PT _ (TS _ 16)          }
-  'GE'          { PT _ (TS _ 17)          }
-  'GEQ'         { PT _ (TS _ 18)          }
-  'IF'          { PT _ (TS _ 19)          }
-  'LE'          { PT _ (TS _ 20)          }
-  'LEQ'         { PT _ (TS _ 21)          }
-  'MINUS'       { PT _ (TS _ 22)          }
-  'MOD'         { PT _ (TS _ 23)          }
-  'NEQ'         { PT _ (TS _ 24)          }
-  'PLUS'        { PT _ (TS _ 25)          }
-  'READ'        { PT _ (TS _ 26)          }
-  'REPEAT'      { PT _ (TS _ 27)          }
-  'THEN'        { PT _ (TS _ 28)          }
-  'TIMES'       { PT _ (TS _ 29)          }
-  'TO'          { PT _ (TS _ 30)          }
-  'UNTIL'       { PT _ (TS _ 31)          }
-  'VAR'         { PT _ (TS _ 32)          }
-  'WHILE'       { PT _ (TS _ 33)          }
-  'WRITE'       { PT _ (TS _ 34)          }
-  '['           { PT _ (TS _ 35)          }
-  ']'           { PT _ (TS _ 36)          }
-  L_Pidentifier { PT _ (T_Pidentifier $$) }
-  L_Number      { PT _ (T_Number $$)      }
+  ','           { PT _ (TS _ 1)          }
+  ':'           { PT _ (TS _ 2)          }
+  ';'           { PT _ (TS _ 3)          }
+  'ASSIGN'      { PT _ (TS _ 4)          }
+  'BEGIN'       { PT _ (TS _ 5)          }
+  'DIV'         { PT _ (TS _ 6)          }
+  'DO'          { PT _ (TS _ 7)          }
+  'DOWNTO'      { PT _ (TS _ 8)          }
+  'ELSE'        { PT _ (TS _ 9)          }
+  'END'         { PT _ (TS _ 10)         }
+  'ENDFOR'      { PT _ (TS _ 11)         }
+  'ENDIF'       { PT _ (TS _ 12)         }
+  'ENDWHILE'    { PT _ (TS _ 13)         }
+  'EQ'          { PT _ (TS _ 14)         }
+  'FOR'         { PT _ (TS _ 15)         }
+  'FROM'        { PT _ (TS _ 16)         }
+  'GE'          { PT _ (TS _ 17)         }
+  'GEQ'         { PT _ (TS _ 18)         }
+  'IF'          { PT _ (TS _ 19)         }
+  'LE'          { PT _ (TS _ 20)         }
+  'LEQ'         { PT _ (TS _ 21)         }
+  'MINUS'       { PT _ (TS _ 22)         }
+  'MOD'         { PT _ (TS _ 23)         }
+  'NEQ'         { PT _ (TS _ 24)         }
+  'PLUS'        { PT _ (TS _ 25)         }
+  'READ'        { PT _ (TS _ 26)         }
+  'REPEAT'      { PT _ (TS _ 27)         }
+  'THEN'        { PT _ (TS _ 28)         }
+  'TIMES'       { PT _ (TS _ 29)         }
+  'TO'          { PT _ (TS _ 30)         }
+  'UNTIL'       { PT _ (TS _ 31)         }
+  'VAR'         { PT _ (TS _ 32)         }
+  'WHILE'       { PT _ (TS _ 33)         }
+  'WRITE'       { PT _ (TS _ 34)         }
+  '['           { PT _ (TS _ 35)         }
+  ']'           { PT _ (TS _ 36)         }
+  L_Pidentifier { PT _ (T_Pidentifier _) }
+  L_Number      { PT _ (T_Number $$)     }
 
 %%
 
 Pidentifier :: { Gramma.Abs.Pidentifier }
-Pidentifier  : L_Pidentifier { Gramma.Abs.Pidentifier $1 }
+Pidentifier  : L_Pidentifier { Gramma.Abs.Pidentifier (mkPosToken $1) }
 
 Number :: { Gramma.Abs.Number }
 Number  : L_Number { Gramma.Abs.Number $1 }

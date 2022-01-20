@@ -29,13 +29,13 @@ generateIter st1 st2 id exp =
   getIdAddr False st1 B id ++ getExpression st2 exp ++ [STORE B]
 
 generateFor :: SymbolTable -> Pidentifier -> Value -> Value -> [Command] -> Bool -> [OpCode]
-generateFor st pid from to body up =
+generateFor st pid@(Pidentifier (_, txt)) from to body up =
   generateIter st' st iter (ValueExpr from) ++
   generateIter st' st limit (ValueExpr to) ++
   generateWhile (genCond st' ((if up then Leq else Geq) (IdValue iter) (IdValue limit))) (
     generateCommands st' body ++ generateIter st' st' iter step)
   where
-    st' = M.insert pid (IterInfo (getFreeMem st)) st
+    st' = M.insert txt (IterInfo (getFreeMem st)) st
     iter = ScalarId pid
     limit = LimitId pid
     step = (if up then Plus else Minus) (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1")))
@@ -76,11 +76,11 @@ getFreeMem st = M.foldl' (\a x -> getAddress x `max` a) 0 st
 
 generateSymbolTable :: Integer -> [Declaration] -> SymbolTable
 generateSymbolTable _ [] = M.empty
-generateSymbolTable freeMem (ScalarDecl pid : xs) =
-  M.insert pid (ScalarInfo freeMem) $
+generateSymbolTable freeMem (ScalarDecl (Pidentifier (_, txt)) : xs) =
+  M.insert txt (ScalarInfo freeMem) $
     generateSymbolTable (freeMem + 1) xs
-generateSymbolTable freeMem (ArrayDecl pid b e : xs) =
-  M.insert pid (ArrayInfo freeMem b' e') $
+generateSymbolTable freeMem (ArrayDecl (Pidentifier (_, txt)) b e : xs) =
+  M.insert txt (ArrayInfo freeMem b' e') $
     generateSymbolTable (freeMem + e' - b' + 1) xs
       where
         e' = valueOf e
