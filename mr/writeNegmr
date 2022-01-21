@@ -1,0 +1,4 @@
+RESET b
+SWAP b
+PUT
+HALT

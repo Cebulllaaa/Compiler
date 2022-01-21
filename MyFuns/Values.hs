@@ -33,7 +33,7 @@ generateConstant :: Reg -> Integer -> [OpCode]
 generateConstant A _ = error "register A is forbidden here"
 generateConstant reg n
   | n >= 0 && n <= maxSmallNumber = [RESET reg] ++ genericReplicate n (INC reg)
-  | n < 0 && n >= negate maxSmallNumber = [RESET reg] ++ genericReplicate n (DEC reg)
+  | n < 0 && n >= negate maxSmallNumber = [RESET reg] ++ genericReplicate (negate n) (DEC reg)
 generateConstant reg n = [RESET reg, INC reg, RESET A] ++ gen n ++ [SWAP reg]
   where
     gen (-1) = [DEC A]

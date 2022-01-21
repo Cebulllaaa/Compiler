@@ -49,7 +49,7 @@ LOAD c
 SWAP c
 SWAP b
 SUB c
-JPOS 64
+JPOS 68
 RESET e
 INC e
 RESET a
@@ -60,6 +60,8 @@ SWAP e
 LOAD e
 SWAP e
 RESET b
+DEC b
+DEC b
 SWAP b
 ADD e
 SWAP b
@@ -84,6 +86,8 @@ SWAP e
 LOAD e
 SWAP e
 RESET b
+DEC b
+DEC b
 SWAP b
 ADD e
 SWAP b
@@ -112,5 +116,5 @@ INC d
 SWAP c
 ADD d
 STORE b
-JUMP -84
+JUMP -88
 HALT

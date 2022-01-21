@@ -1,0 +1,7 @@
+RESET b
+DEC b
+DEC b
+DEC b
+SWAP b
+PUT
+HALT

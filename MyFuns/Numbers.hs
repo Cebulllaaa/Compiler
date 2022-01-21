@@ -39,9 +39,12 @@ getExpression st (Plus x y) =
   getValue st C x ++ getValue st D y ++ [SWAP C, ADD D]
 getExpression st (Minus x y) =
   getValue st C x ++ getValue st D y ++ [SWAP C, SUB D]
+
+
 getExpression st (Times x y) =
   getValue st C x ++ getValue st D y ++
   [RESET G, DEC G, RESET H, INC H, RESET E] ++
+  [RESET A, ADD C, JPOS 7, RESET A, SUB C, SWAP C, RESET A, SUB D, SWAP D]++
   generateWhile (\skip -> [RESET A, ADD C, JZERO (CodePos (skip + 1))])
     [RESET A, ADD C, SHIFT G, SHIFT H, SUB C, JZERO 4,
      SWAP E, ADD D, SWAP E,
