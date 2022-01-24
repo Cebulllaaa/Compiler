@@ -2,7 +2,6 @@
 module MyFuns.Numbers (
   getExpression,
   generateWhile,
-  getValue,
   getIdAddr
 ) where
 
@@ -52,21 +51,20 @@ getExpression st (Times x y) =
   ++ [SWAP E]
 getExpression st (Div x y) =
   getValue st C x ++ getValue st D y ++ 
-  [RESET G, DEC G, RESET H, INC H, RESET E] ++
-  [SWAP D, JZERO (CodePos (1 + 14 + 8 + 20 + 1)), SWAP D] ++
-  generateWhile (\skip ->
-    [RESET A, ADD D, SHIFT G, SHIFT H, SUB D,
-     JZERO 2, JUMP (CodePos (skip + 1))])
-    [SWAP C, SHIFT G, SWAP C, SWAP D, SHIFT G, SWAP D] ++
+  [RESET G, RESET H, INC H, RESET E] ++
+  [RESET A, ADD D, JZERO (CodePos (7 + 9 + 9 + 21 + 8 + 1))] ++
+  [JPOS 7, RESET A, SUB D ,SWAP D, RESET A, SUB C, SWAP C] ++
+  [RESET A, SWAP F, RESET A, ADD C, JPOS 4, INC F, RESET A, SUB C, SWAP C] ++
   generateWhile (\skip ->
     [RESET A, ADD C, SUB D, JNEG (CodePos (skip + 1))])
-    [SWAP D, SHIFT H, SWAP D] ++
+    [SWAP D, SHIFT H, SWAP D, INC G] ++
   generateWhile (\skip ->
-    [RESET A, ADD D, SHIFT G, SHIFT H, SUB D,
-     JZERO 2, JUMP (CodePos (skip + 1))])
-    [SWAP E, SHIFT H, SWAP E, SWAP D, SHIFT G, SWAP D, 
+    [SWAP G, JZERO (CodePos (skip + 1))])
+    [SWAP G, DEC G, SWAP E, SHIFT H, SWAP E,
+    SWAP D, DEC H, DEC H, SHIFT H, INC H, INC H, SWAP D, 
     RESET A, ADD C, SUB D, JNEG 3, SWAP C, INC E] ++ 
-  [SWAP E]
+  [SWAP F, JZERO 7, RESET A, SUB E, SWAP E, SWAP C, JZERO 2, DEC E]
+  ++ [SWAP E]
 
 getExpression st (Mod x y) =
   getValue st C x ++ getValue st D y ++

@@ -1,4 +1,4 @@
-( Błąd w linii 5: użycie niezainicjowanej zmiennej a tak jak w 3)
+( Błąd w linii 5: użycie niezainicjowanej zmiennej )
 VAR
   a
 BEGIN

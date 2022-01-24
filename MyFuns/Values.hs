@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE StrictData #-}
 module MyFuns.Values (
     SymbolTable,
     valueOf,
@@ -10,7 +11,7 @@ module MyFuns.Values (
 
 ) where
 
-import Data.Map as M (Map, lookup)
+import Data.Map.Strict as M (Map, lookup)
 import Data.Text as T (unpack)
 import MyFuns.SimpleLanguage
 import Gramma.Abs
@@ -18,12 +19,13 @@ import Data.List (genericLength)
 import Data.List (genericReplicate)
 import Data.Text (Text)
 
+type SymbolTable = M.Map Text VarInfo
+
 data VarInfo
-  = ScalarInfo {address :: Integer}
+  = ScalarInfo {address :: Integer, initialized :: Bool}
   | IterInfo {address :: Integer}
   | ArrayInfo {address :: Integer, begin :: Integer, end :: Integer}
-
-
+  deriving (Eq, Ord)
 
 maxSmallNumber :: Integer
 maxSmallNumber = 3
@@ -43,7 +45,6 @@ generateConstant reg n = [RESET reg, INC reg, RESET A] ++ gen n ++ [SWAP reg]
       where
         (q, r) = quotRem k 2
 
-type SymbolTable = M.Map Text VarInfo
 valueOf :: Number -> Integer
 valueOf (Number txt) = read $ unpack txt
 
@@ -76,7 +77,11 @@ getIdAddr mutation st reg (LimitId pid) =
 getIdAddr mutation st reg (ScalarId pid) =
   case lookupVar pid st of
     Nothing -> error $ message pid "undeclared identifier"
-    Just (ScalarInfo addr) -> generateConstant reg addr
+    Just (ScalarInfo addr init) ->
+      if not mutation && not init then
+        error $ message pid "uninitialized scalar variable"
+      else 
+        generateConstant reg addr
     Just (IterInfo addr) ->
       if mutation then
         error $ message pid "iterator cannot be modified"
