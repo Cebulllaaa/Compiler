@@ -69,11 +69,15 @@ getExpression st (Div x y) =
 getExpression st (Mod x y) =
   getValue st C x ++ getValue st D y ++
   [RESET G, DEC G, RESET H, INC H, RESET E] ++
-  [RESET A, ADD D, JZERO (CodePos (9+14+5+1))] ++
+  [RESET A, ADD D, JZERO (CodePos ( 9+ 8 + 9+14+9 +10+1))] ++
+  [RESET F,JPOS 8 , INC F, RESET A ,SUB C, SWAP C, RESET A, SUB D, SWAP D ]++
+  [RESET A, ADD C , JPOS 6 , INC F , INC F , RESET A , SUB C , SWAP C ] ++
   generateWhile (\skip -> [RESET A, ADD C, SUB D, JNEG (CodePos (skip + 1))])
     [SWAP D, SHIFT H, SWAP D, INC E] ++
   generateWhile (\skip ->
     [RESET A, ADD E, JPOS (CodePos 2), JUMP (CodePos (skip +1))])
-    [RESET A, ADD C, SUB D, JNEG 2, SWAP C, SWAP D, SHIFT G, SWAP D, DEC E] ++
-  [RESET A, ADD C, SUB D, JNEG 3, JUMP 3, RESET C, SWAP C]
+    [RESET A , SWAP D, SHIFT G ,SWAP D, ADD C, SUB D, JNEG 2, SWAP C, DEC E] ++ 
+  [RESET A, ADD F, SHIFT G , JZERO 6 , RESET A, SUB C , JZERO 3 , ADD D, SWAP D] ++
+  [RESET A , ADD F, SHIFT G, SHIFT H, SUB F, JZERO 6, RESET A, SUB C, SWAP C, JUMP 2] ++
+  [RESET C,SWAP C]
 

@@ -22,9 +22,8 @@ def div(c,d):
     d = -d
   f = 0
   if c <= 0:
-    if c != 0:
-      c = -c
-      f += 1
+    c = -c
+    f += 1
   g = 0
   while c - d >= 0:
     d <<= 1
