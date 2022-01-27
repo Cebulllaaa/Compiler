@@ -1,0 +1,8 @@
+VAR
+    x
+BEGIN
+    FOR i FROM 0 TO 12 DO
+        x ASSIGN 50 MOD i;
+        WRITE x;
+    ENDFOR
+END

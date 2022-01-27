@@ -77,7 +77,7 @@ getExpression st (Mod x y) =
   generateWhile (\skip ->
     [RESET A, ADD E, JPOS (CodePos 2), JUMP (CodePos (skip +1))])
     [RESET A , SWAP D, SHIFT G ,SWAP D, ADD C, SUB D, JNEG 2, SWAP C, DEC E] ++ 
-  [RESET A, ADD F, SHIFT G , JZERO 6 , RESET A, SUB C , JZERO 3 , ADD D, SWAP D] ++
+  [RESET A, ADD F, SHIFT G , JZERO 6 , RESET A, SUB C , JZERO 3 , ADD D, SWAP C] ++
   [RESET A , ADD F, SHIFT G, SHIFT H, SUB F, JZERO 6, RESET A, SUB C, SWAP C, JUMP 2] ++
   [RESET C,SWAP C]
 

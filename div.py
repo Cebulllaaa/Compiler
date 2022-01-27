@@ -67,6 +67,7 @@ def mod(c,d):
   if (f >> 1) != 0:
     if c != 0:
       c = d - c
+  print(c,d,e,f)
   if ((f >> 1) << 1) - f != 0:
     c = -c
   return c

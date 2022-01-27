@@ -229,7 +229,7 @@ RESET a
 SUB c
 JZERO 3
 ADD d
-SWAP d
+SWAP c
 RESET a
 ADD f
 SHIFT g
@@ -316,7 +316,7 @@ RESET a
 SUB c
 JZERO 3
 ADD d
-SWAP d
+SWAP c
 RESET a
 ADD f
 SHIFT g

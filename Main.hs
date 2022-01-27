@@ -16,11 +16,6 @@ import Control.Exception (catch, ErrorCall(..))
 import Data.Semigroup (Max(..))
 import Control.Monad.State.Strict (State, get, put, state, runState, evalState)
 
-optimize :: Program -> Program
-optimize = id
-
-analyze:: Program -> Program
-analyze = id
 
 generateCommands :: [Command] -> State SymbolTable [OpCode]
 generateCommands = fmap concat . mapM generateCommand
@@ -134,8 +129,6 @@ main = do
       case pProgram inputTokens of
         Left errorMessage -> putStrLn errorMessage
         Right abstractSyntaxTree -> do
-          let analyzedTree = analyze abstractSyntaxTree
-          let optimizedTree = optimize analyzedTree
-          let generatedCode = generateCode optimizedTree ++ [HALT]
+          let generatedCode = generateCode abstractSyntaxTree ++ [HALT]
           catch (TIO.writeFile outputPath $ T.unlines $ showText <$> generatedCode) $
             \(ErrorCall e) -> putStrLn e

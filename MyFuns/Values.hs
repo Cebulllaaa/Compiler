@@ -28,7 +28,7 @@ data VarInfo
   deriving (Eq, Ord)
 
 maxSmallNumber :: Integer
-maxSmallNumber = 3
+maxSmallNumber = 25
 
 -- | DO NOT USE REGISTER A
 generateConstant :: Reg -> Integer -> [OpCode]
