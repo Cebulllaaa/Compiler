@@ -1,0 +1,29 @@
+RESET b
+INC b
+RESET c
+INC c
+INC c
+INC c
+INC c
+INC c
+SWAP c
+STORE b
+RESET f
+INC f
+RESET a
+ADD f
+SWAP b
+RESET c
+INC c
+LOAD c
+SWAP c
+SWAP b
+SUB c
+JPOS 7
+RESET b
+INC b
+SWAP b
+PUT
+INC f
+JUMP -15
+HALT

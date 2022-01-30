@@ -1,8 +1,7 @@
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE ViewPatterns, OverloadedStrings #-}
 module MyFuns.Numbers (
   getExpression,
-  generateWhile,
-  getIdAddr
+  generateWhile
 ) where
 
 import MyFuns.SimpleLanguage
@@ -26,12 +25,24 @@ getExpression :: SymbolTable -> Expression -> [OpCode]
 getExpression st (ValueExpr x) = getValue st C x ++ [SWAP C]
 getExpression _ (Plus (NumValue x) (NumValue y)) =
   generateConstant C (valueOf x + valueOf y) ++ [SWAP C]
+getExpression st (Plus (NumValue "1") y) =
+  getValue st C y ++ [INC C, SWAP C]
+getExpression st (Plus  y (NumValue "1")) =
+  getValue st C y ++ [INC C, SWAP C]  
 getExpression _ (Minus (NumValue x) (NumValue y)) =
   generateConstant C (valueOf x - valueOf y) ++ [SWAP C]
+getExpression st (Minus  y (NumValue "1")) =
+  getValue st C y ++ [DEC C, SWAP C]  
 getExpression _ (Times (NumValue x) (NumValue y)) =
   generateConstant C (valueOf x * valueOf y) ++ [SWAP C]
+getExpression st (Times (NumValue "2") y) =
+  getValue st C y ++ [RESET H,INC H, SWAP C, SHIFT H]
+getExpression st (Times  y (NumValue "2")) =
+  getValue st C y ++ [RESET H, INC H, SWAP C, SHIFT H]  
 getExpression _ (Div (NumValue x) (NumValue y)) =
   generateConstant C (valueOf x `quot` valueOf y) ++ [SWAP C]
+getExpression st (Div  y (NumValue "2")) =
+  getValue st C y ++ [RESET H, DEC H, SWAP C, SHIFT H]  
 getExpression _ (Mod (NumValue x) (NumValue y)) =
   generateConstant C (valueOf x `rem` valueOf y) ++ [SWAP C]
 getExpression st (Plus x y) =
@@ -68,16 +79,17 @@ getExpression st (Div x y) =
 
 getExpression st (Mod x y) =
   getValue st C x ++ getValue st D y ++
-  [RESET G, DEC G, RESET H, INC H, RESET E] ++
-  [RESET A, ADD D, JZERO (CodePos ( 9+ 8 + 9+14+9 +10+1))] ++
-  [RESET F,JPOS 8 , INC F, RESET A ,SUB C, SWAP C, RESET A, SUB D, SWAP D ]++
-  [RESET A, ADD C , JPOS 6 , INC F , INC F , RESET A , SUB C , SWAP C ] ++
+  [RESET H, INC H, RESET E] ++
+  [RESET A, ADD D, JZERO (CodePos ( 9+ 8 + 9+2 +14+9 +12+1))] ++
+  [RESET G,JPOS 8 , INC G, RESET A ,SUB C, SWAP C, RESET A, SUB D, SWAP D ]++
+  [RESET A, ADD C , JPOS 6 , INC G , INC G , RESET A , SUB C , SWAP C ] ++
   generateWhile (\skip -> [RESET A, ADD C, SUB D, JNEG (CodePos (skip + 1))])
     [SWAP D, SHIFT H, SWAP D, INC E] ++
+  [DEC H, DEC H] ++
   generateWhile (\skip ->
     [RESET A, ADD E, JPOS (CodePos 2), JUMP (CodePos (skip +1))])
-    [RESET A , SWAP D, SHIFT G ,SWAP D, ADD C, SUB D, JNEG 2, SWAP C, DEC E] ++ 
-  [RESET A, ADD F, SHIFT G , JZERO 6 , RESET A, SUB C , JZERO 3 , ADD D, SWAP C] ++
-  [RESET A , ADD F, SHIFT G, SHIFT H, SUB F, JZERO 6, RESET A, SUB C, SWAP C, JUMP 2] ++
+    [RESET A , SWAP D,SHIFT H ,SWAP D, ADD C, SUB D, JNEG 2, SWAP C, DEC E] ++ 
+  [RESET A, ADD G, SHIFT H , JZERO 6 , RESET A, SUB C , JZERO 3 , ADD D, SWAP C] ++
+  [RESET A , ADD G, SHIFT H, INC H, INC H, SHIFT H, SUB G, JZERO 6, RESET A, SUB C, SWAP C, JUMP 2] ++
   [RESET C,SWAP C]
 

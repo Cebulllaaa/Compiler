@@ -7,9 +7,9 @@ BEGIN
 	    p ASSIGN n DIV 2;
 	    p ASSIGN 2 TIMES p;
 	    IF n NEQ p THEN
-		WRITE 1;
+			WRITE 1;
 	    ELSE
-		WRITE 0;
+			WRITE 0;
 	    ENDIF
 	    n ASSIGN n DIV 2;
 	UNTIL n EQ 0;

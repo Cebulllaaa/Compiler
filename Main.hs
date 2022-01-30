@@ -16,18 +16,35 @@ import Control.Exception (catch, ErrorCall(..))
 import Data.Semigroup (Max(..))
 import Control.Monad.State.Strict (State, get, put, state, runState, evalState)
 
+generateFastFor :: Pidentifier -> Value -> Value -> [Command] -> Bool -> State SymbolTable [OpCode]
+generateFastFor pid@(Pidentifier (_, txt)) from to body up = do
+  st <- get
+  let st' = safeInsert txt (IterInfo (getFreeMem st) True) st
+  let limit = LimitId pid
+  let iter = ScalarId pid
+  let step = (if up then Plus else Minus) (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1")))
+  let (codeB, st'') = runState (generateCommands body) st'
+  put $ M.delete txt st''
+  return $ generateIter st' st limit (ValueExpr to) ++ 
+    getValue st F from  ++
+    generateWhile (genCond st' ((if up then Leq else Geq) (IdValue iter) (IdValue limit)))
+    (codeB ++ (if up then [INC F] else [DEC F]))
 
 generateCommands :: [Command] -> State SymbolTable [OpCode]
 generateCommands = fmap concat . mapM generateCommand
 
 generateIter :: SymbolTable -> SymbolTable -> Identifier -> Expression -> [OpCode]
 generateIter st1 st2 id exp =
-  getIdAddr False st1 B id ++ getExpression st2 exp ++ [STORE B]
+  case getIdAddr False st1 B id of
+    Just codeB ->
+      codeB ++ getExpression st2 exp ++ [STORE B]
+    Nothing ->
+      error "generateIter internal error"
 
 generateFor :: Pidentifier -> Value -> Value -> [Command] -> Bool -> State SymbolTable [OpCode]
 generateFor pid@(Pidentifier (_, txt)) from to body up = do
   st <- get
-  let st' = safeInsert txt (IterInfo (getFreeMem st)) st
+  let st' = safeInsert txt (IterInfo  (getFreeMem st) False) st
   let iter = ScalarId pid
   let limit = LimitId pid
   let step = (if up then Plus else Minus) (IdValue (ScalarId pid)) (NumValue (Number (T.pack "1")))
@@ -59,7 +76,12 @@ initialize st id = st
 
 generateCommand :: Command -> State SymbolTable [OpCode]
 generateCommand (Assign id exp) =
-  state (\st -> (getIdAddr True st B id ++ getExpression st exp ++ [STORE B], initialize st id))
+  state (\st -> ( 
+    case getIdAddr True st B id of
+      Just codeB ->
+        (codeB ++ getExpression st exp ++ [STORE B], initialize st id)
+      Nothing ->
+        error "internal error"))
 generateCommand (IfElse cond cmdsI cmdsE) = do
   st <- get
   let (codeI, stI) = runState (generateCommands cmdsI) st
@@ -80,12 +102,21 @@ generateCommand (Repeat body cond) = do
     codeC = genCond st cond (negate (lenB + lenC - 1))
     lenC = genericLength codeC
   return (codeB ++ codeC)
-generateCommand (ForTo pid from to body) =
-  generateFor pid from to body True
-generateCommand (ForDownTo pid from to body) =
-  generateFor pid from to body False
+generateCommand (ForTo pid from to body) 
+  | x == False = generateFor pid from to body True
+  | x == True = generateFastFor pid from to body True
+  where x = fastFor body
+generateCommand (ForDownTo pid from to body)
+  | x == False = generateFor pid from to body False
+  | x ==True = generateFastFor pid from to body False
+  where x = fastFor body
 generateCommand (Read id) =
-  state (\st -> (getIdAddr True st B id ++ [GET, STORE B], initialize st id))
+  state (\st -> (
+    case getIdAddr True st B id of 
+      Just codeB ->
+        (codeB ++ [GET, STORE B], initialize st id)
+      Nothing ->
+        error "internal error"))
 generateCommand (Write x) = do
   st <- get
   return (getValue st B x ++ [SWAP B, PUT])
@@ -94,7 +125,7 @@ getFreeMem :: SymbolTable -> Integer
 getFreeMem st = M.foldl' (\a x -> getAddress x `max` a) 0 st
   where
     getAddress (ScalarInfo a _) = a + 1
-    getAddress (IterInfo a) = a + 2
+    getAddress (IterInfo a b) = a + 2
     getAddress (ArrayInfo a b e) = a + e - b + 1
 
 generateSymbolTable :: Integer -> [Declaration] -> SymbolTable
