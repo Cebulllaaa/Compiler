@@ -1,0 +1,7 @@
+VAR 
+    x
+BEGIN
+    READ x;
+    x ASSIGN x PLUS 5;
+    WRITE x;
+END

@@ -24,11 +24,11 @@ import Data.Word     (Word8)
 #endif
 #if __GLASGOW_HASKELL__ >= 503
 import Data.Array
-import Data.Array.Base (unsafeAt)
 #else
 import Array
 #endif
 #if __GLASGOW_HASKELL__ >= 503
+import Data.Array.Base (unsafeAt)
 import GHC.Exts
 #else
 import GlaExts
@@ -323,6 +323,7 @@ alex_action_5 =  tok (eitherResIdent TV)
 
 
 
+
 -- Do not remove this comment. Required to fix CPP parsing when using GCC and a clang-compiled alex.
 #if __GLASGOW_HASKELL__ > 706
 #define GTE(n,m) (tagToEnum# (n >=# m))
@@ -357,6 +358,7 @@ uncheckedShiftL# = shiftL#
 #endif
 
 {-# INLINE alexIndexInt16OffAddr #-}
+alexIndexInt16OffAddr :: AlexAddr -> Int# -> Int#
 alexIndexInt16OffAddr (AlexA# arr) off =
 #ifdef WORDS_BIGENDIAN
   narrow16Int# i
@@ -366,7 +368,10 @@ alexIndexInt16OffAddr (AlexA# arr) off =
         low  = int2Word# (ord# (indexCharOffAddr# arr off'))
         off' = off *# 2#
 #else
-  indexInt16OffAddr# arr off
+#if __GLASGOW_HASKELL__ >= 901
+  int16ToInt#
+#endif
+    (indexInt16OffAddr# arr off)
 #endif
 
 
@@ -374,6 +379,7 @@ alexIndexInt16OffAddr (AlexA# arr) off =
 
 
 {-# INLINE alexIndexInt32OffAddr #-}
+alexIndexInt32OffAddr :: AlexAddr -> Int# -> Int#
 alexIndexInt32OffAddr (AlexA# arr) off =
 #ifdef WORDS_BIGENDIAN
   narrow32Int# i
@@ -387,7 +393,10 @@ alexIndexInt32OffAddr (AlexA# arr) off =
    b0   = int2Word# (ord# (indexCharOffAddr# arr off'))
    off' = off *# 4#
 #else
-  indexInt32OffAddr# arr off
+#if __GLASGOW_HASKELL__ >= 901
+  int32ToInt#
+#endif
+    (indexInt32OffAddr# arr off)
 #endif
 
 

@@ -1,0 +1,22 @@
+RESET b
+GET
+STORE b
+RESET b
+RESET c
+LOAD c
+SWAP c
+RESET d
+INC d
+INC d
+INC d
+INC d
+INC d
+SWAP c
+ADD d
+STORE b
+RESET b
+LOAD b
+SWAP b
+SWAP b
+PUT
+HALT

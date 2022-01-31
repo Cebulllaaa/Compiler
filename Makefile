@@ -3,9 +3,9 @@
 GHC		= ghc
 GHC_OPTS = -o bin/Compiler
 GHC_TOPTS = -o bin/Test
-HAPPY	  = happy
+HAPPY	  = ~/.cabal/bin/happy
 HAPPY_OPTS = --array --info --ghc --coerce
-ALEX	   = alex
+ALEX	   = ~/.cabal/bin/alex
 ALEX_OPTS  = --ghc
 
 # List of goals not corresponding to file names.
@@ -22,7 +22,7 @@ all : Gramma/Abs.hs Gramma/Layout.hs Gramma/Lex.hs \
 # Rules for building the parser.
 
 Gramma/Test.hs Gramma/Skel.hs Gramma/Abs.hs Gramma/Layout.hs Gramma/Lex.xGramma/Par.y Gramma/Print.hs Gramma/Doc.txt : Gramma.cf
-	bnfc --haskell -d --text-token Gramma.cf
+	~/.cabal/bin/bnfc --haskell -d --text-token Gramma.cf
 	rm Gramma/ErrM.hs
 
 Gramma/Par.info : Gramma/Lex.hs Gramma/Par.hs
